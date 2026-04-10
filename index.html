@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>匿名懺悔室 - AI救済と徳の聖域</title>
+    <link rel="manifest" href="manifest.json">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap');
+        body { font-family: 'Noto Serif JP', serif; background-color: #0f0f1a; color: #e2e2e2; }
+        .confession-card { background: linear-gradient(145deg, #16213e, #0f3460); border-left: 4px solid #4e4e91; }
+        .locked { filter: blur(5px); pointer-events: none; user-select: none; }
+        .sage-only { border: 2px solid #ffd700; background: rgba(255, 215, 0, 0.05); }
+        .exp-bar { transition: width 0.5s ease-out; }
+    </style>
+</head>
+<body class="min-h-screen pb-20">
+    <!-- ステータスバー（徳ゲージ） -->
+    <nav class="sticky top-0 z-50 bg-gray-900 bg-opacity-90 p-4 border-b border-indigo-900">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <div>
+                <span id="rankName" class="text-xs font-bold text-indigo-300">Lv.1 迷える魂</span>
+                <div class="w-32 h-2 bg-gray-700 rounded-full mt-1">
+                    <div id="expBar" class="exp-bar h-full bg-indigo-500 rounded-full" style="width: 0%"></div>
+                </div>
+            </div>
+            <div id="sageStatus" class="text-[10px] text-gray-500">徳を積み、聖者を目指せ</div>
+        </div>
+    </nav>
+
+    <div class="max-w-md mx-auto px-4 py-8">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-bold mb-2 text-indigo-100">匿名懺悔室</h1>
+            <p class="text-sm text-gray-400 font-light italic">あなたの重荷を、光に変える場所。</p>
+        </header>
+
+        <!-- 投稿フォーム -->
+        <section class="mb-12">
+            <div class="bg-gray-800 bg-opacity-50 p-6 rounded-2xl border border-gray-700 shadow-xl">
+                <textarea id="confessionInput" class="w-full bg-transparent border-none focus:ring-0 text-lg placeholder-gray-500 resize-none h-32" placeholder="今の思いを吐き出してください..."></textarea>
+                <div class="flex justify-end mt-4">
+                    <button id="postBtn" class="bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-2 rounded-full font-bold transition">懺悔する</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- タイムライン -->
+        <section>
+            <h2 class="text-xl font-bold mb-6 flex items-center">
+                <span class="mr-2">🕯️</span> 聖域の記録
+            </h2>
+            <div id="lockMessage" class="text-center py-10 border-2 border-dashed border-gray-800 rounded-xl mb-6">
+                <p class="text-gray-500 text-sm">Lv.2になると、他人の懺悔に触れられます</p>
+            </div>
+            <div id="confessionList" class="space-y-6 locked">
+                <!-- 投稿がここに並ぶ -->
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let exp = 0;
+        let level = 1;
+        const list = document.getElementById('confessionList');
+        const input = document.getElementById('confessionInput');
+
+        // 投稿処理
+        document.getElementById('postBtn').addEventListener('click', () => {
+            if(!input.value.trim()) return;
+            
+            // 投稿するたびに徳(EXP)が貯まる
+            addExp(35);
+            
+            const card = document.createElement('div');
+            card.className = 'confession-card p-5 rounded-xl shadow-lg mb-4';
+            card.innerHTML = `<p class="text-gray-200">${input.value}</p>
+                             <div class="flex justify-between items-center mt-4 text-xs">
+                                <span class="text-gray-500">たった今</span>
+                                <button onclick="this.disabled=true; addExp(10);" class="text-indigo-300 border border-indigo-900 px-3 py-1 rounded-full">🙏 許す</button>
+                             </div>`;
+            list.prepend(card);
+            input.value = '';
+        });
+
+        function addExp(amount) {
+            exp += amount;
+            if (exp >= 100) {
+                exp = 0;
+                level++;
+                updateUI();
+            }
+            document.getElementById('expBar').style.width = exp + '%';
+        }
+
+        function updateUI() {
+            const rank = document.getElementById('rankName');
+            const listEl = document.getElementById('confessionList');
+            const lockMsg = document.getElementById('lockMessage');
+
+            if (level === 1) rank.innerText = "Lv.1 迷える魂";
+            if (level === 2) {
+                rank.innerText = "Lv.2 共鳴する者";
+                listEl.classList.remove('locked');
+                lockMsg.classList.add('hidden');
+            }
+            if (level >= 5) {
+                rank.innerText = "Lv.5 聖者";
+                rank.classList.add('text-yellow-400');
+                document.getElementById('sageStatus').innerText = "✨ 導きの力が解放されました";
+            }
+        }
+        
+        // PWAのサービスワーカー登録
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
+    </script>
+</body>
+</html>
