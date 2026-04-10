@@ -1,0 +1,16 @@
+{
+  "name": "匿名懺悔室",
+  "short_name": "懺悔室",
+  "description": "あなたの秘密を光に変える聖域",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#0f0f1a",
+  "theme_color": "#818cf8",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/1042/1042680.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
